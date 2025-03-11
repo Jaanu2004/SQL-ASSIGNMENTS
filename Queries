@@ -1,0 +1,391 @@
+-- 1. Display snum, sname, city, and comm of all salespeople.
+SELECT Snum, Sname, City, Comm FROM SalesPeople;
+
+-- 2. Display all snum without duplicates from all orders.
+SELECT DISTINCT Snum FROM Orders;
+
+-- 3. Display names and commissions of all salespeople in London.
+SELECT Sname, Comm FROM SalesPeople WHERE City = 'London';
+
+-- 4. All customers with a rating of 100.
+SELECT * FROM Customers WHERE Rating = 100;
+
+-- 5. Produce orderno, amount, and date from all rows in the order table.
+SELECT Onum, AMT, Odate FROM Orders;
+
+
+-- 6. All customers in San Jose who have a rating more than 200.
+SELECT * FROM Customers WHERE City = 'San Jose' AND Rating > 200;
+
+-- 7. All customers who were either located in San Jose or had a rating above 200.
+SELECT * FROM Customers WHERE City = 'San Jose' OR Rating > 200;
+
+-- 8. All orders for more than $1000.
+SELECT * FROM Orders WHERE AMT > 1000;
+
+-- 9. Names and cities of all salespeople in London with commission above 0.10.
+SELECT Sname, City FROM SalesPeople WHERE City = 'London' AND Comm > 0.10;
+
+-- 10. All customers excluding those with rating <= 100 unless they are located in Rome.
+SELECT * FROM Customers WHERE Rating > 100 OR City = 'Rome';
+
+-- 11. All salespeople either in Barcelona or in London.
+SELECT * FROM SalesPeople WHERE City IN ('Barcelona', 'London');
+
+-- 12. All salespeople with commission between 0.10 and 0.12. (Boundary values should be excluded)
+SELECT * FROM SalesPeople WHERE Comm > 0.10 AND Comm < 0.12;
+
+-- 13. All customers with NULL values in the city column.
+SELECT * FROM Customers WHERE City IS NULL;
+
+-- 14. All orders taken on Oct 3rd and Oct 4th, 1994.
+SELECT * FROM Orders WHERE Odate IN ('1994-10-03', '1994-10-04');
+
+-- 15. All customers serviced by Peel or Motika.
+SELECT * FROM Customers WHERE Snum IN (SELECT Snum FROM SalesPeople WHERE Sname IN ('Peel', 'Motika'));
+
+-- 16. All customers whose names begin with a letter from A to B.
+SELECT * FROM Customers WHERE Cname LIKE 'A%' OR Cname LIKE 'B%';
+
+-- 17. All orders except those with 0 or NULL value in amt field.
+SELECT * FROM Orders WHERE AMT IS NOT NULL AND AMT <> 0;
+
+-- 18. Count the number of salespeople currently listing orders in the order table.
+SELECT COUNT(DISTINCT Snum) FROM Orders;
+
+-- 19. Largest order taken by each salesperson, datewise.
+SELECT Snum, Odate, MAX(AMT) AS MaxOrder FROM Orders GROUP BY Snum, Odate;
+
+-- 20. Largest order taken by each salesperson with order value more than $3000.
+SELECT Snum, MAX(AMT) AS MaxOrder FROM Orders WHERE AMT > 3000 GROUP BY Snum;
+
+-- 21. Which day had the highest total amount ordered.
+SELECT Odate, SUM(AMT) AS TotalAmt FROM Orders GROUP BY Odate ORDER BY TotalAmt DESC LIMIT 1;
+
+-- 22. Count all orders for Oct 3rd.
+SELECT COUNT(*) FROM Orders WHERE Odate = '1994-10-03';
+
+-- 23. Count the number of different non-NULL city values in customers table.
+SELECT COUNT(DISTINCT City) FROM Customers WHERE City IS NOT NULL;
+
+-- 24. Select each customer’s smallest order.
+SELECT Cnum, MIN(AMT) AS MinOrder FROM Orders GROUP BY Cnum;
+
+-- 25. First customer in alphabetical order whose name begins with G.
+SELECT * FROM Customers WHERE Cname LIKE 'G%' ORDER BY Cname LIMIT 1;
+
+-- 26. Get the output like “For dd/mm/yy there are ___ orders.”
+SELECT CONCAT('For ', DATE_FORMAT(Odate, '%d/%m/%y'), ' there are ', COUNT(*), ' orders.') AS OrderSummary FROM Orders GROUP BY Odate;
+
+-- 27. Assume that each salesperson has a 12% commission. Produce order no., salesperson no., and amount of salesperson’s commission for that order.
+SELECT Onum, Snum, AMT * 0.12 AS Commission FROM Orders;
+
+-- 28. Find highest rating in each city. Output: "For the city (city), the highest rating is: (rating)."
+SELECT CONCAT('For the city ', City, ', the highest rating is: ', MAX(Rating)) AS HighestRating FROM Customers GROUP BY City;
+
+-- 29. Display the totals of orders for each day and place the results in descending order.
+SELECT Odate, SUM(AMT) AS TotalAmt FROM Orders GROUP BY Odate ORDER BY TotalAmt DESC;
+
+-- 30. All combinations of salespeople and customers who shared a city (same city).
+SELECT S.Sname, S.City, C.Cname FROM SalesPeople S, Customers C WHERE S.City = C.City;
+
+-- 31. Name of all customers matched with the salespeople serving them.
+SELECT C.Cname, S.Sname FROM Customers C JOIN SalesPeople S ON C.Snum = S.Snum;
+
+-- 32. List each order number followed by the name of the customer who made the order.
+SELECT O.Onum, C.Cname FROM Orders O JOIN Customers C ON O.Cnum = C.Cnum;
+
+-- 33. Names of salesperson and customer for each order after the order number.
+SELECT O.Onum, S.Sname, C.Cname FROM Orders O JOIN SalesPeople S ON O.Snum = S.Snum JOIN Customers C ON O.Cnum = C.Cnum;
+
+-- 34. Produce all customers serviced by salespeople with a commission above 12%.
+SELECT * FROM Customers WHERE Snum IN (SELECT Snum FROM SalesPeople WHERE Comm > 0.12);
+
+-- 35. Calculate the amount of the salesperson’s commission on each order with a rating above 100.
+SELECT O.Onum, O.Snum, O.AMT * S.Comm AS Commission FROM Orders O JOIN SalesPeople S ON O.Snum = S.Snum WHERE O.Cnum IN (SELECT Cnum FROM Customers WHERE Rating > 100);
+
+-- 36. Find all pairs of customers having the same rating.
+SELECT C1.Cname, C2.Cname, C1.Rating FROM Customers C1, Customers C2 WHERE C1.Rating = C2.Rating AND C1.Cnum < C2.Cnum;
+
+-- 37. Find all pairs of customers having the same rating, each pair coming once only.
+SELECT C1.Cname AS Customer1, C2.Cname AS Customer2, C1.Rating FROM Customers C1 JOIN Customers C2 ON C1.Rating = C2.Rating WHERE C1.Cnum < C2.Cnum;
+
+-- 38. Policy is to assign three salespeople to each customer. Display all such combinations.
+SELECT C.Cname, S1.Sname, S2.Sname, S3.Sname FROM Customers C, SalesPeople S1, SalesPeople S2, SalesPeople S3 WHERE S1.Snum < S2.Snum AND S2.Snum < S3.Snum;
+
+-- 39. Display all customers located in cities where salesperson Serres has customers.
+SELECT * FROM Customers WHERE City IN (SELECT City FROM Customers WHERE Snum = (SELECT Snum FROM SalesPeople WHERE Sname = 'Serres'));
+
+-- 40. Find all pairs of customers served by a single salesperson.
+SELECT C1.Cname AS Customer1, C2.Cname AS Customer2, C1.Snum FROM Customers C1 JOIN Customers C2 ON C1.Snum = C2.Snum WHERE C1.Cnum < C2.Cnum;
+
+-- 41. Produce all pairs of salespeople which are living in the same city. 
+-- Exclude combinations of salespeople with themselves as well as duplicates with the order reversed.
+SELECT S1.Sname AS Salesperson1, S2.Sname AS Salesperson2, S1.City
+FROM SalesPeople S1 
+JOIN SalesPeople S2 ON S1.City = S2.City 
+WHERE S1.Snum < S2.Snum;
+
+-- 42. Produce all pairs of orders by a given customer, name that customer, and eliminate duplicates.
+SELECT O1.Onum AS Order1, O2.Onum AS Order2, C.Cname
+FROM Orders O1
+JOIN Orders O2 ON O1.Cnum = O2.Cnum AND O1.Onum < O2.Onum
+JOIN Customers C ON O1.Cnum = C.Cnum;
+
+-- 43. Produce names and cities of all customers with the same rating as Hoffman.
+SELECT Cname, City FROM Customers WHERE Rating = (SELECT Rating FROM Customers WHERE Cname = 'Hoffman');
+
+-- 44. Extract all the orders of Motika.
+SELECT * FROM Orders WHERE Snum = (SELECT Snum FROM SalesPeople WHERE Sname = 'Motika');
+
+-- 45. All orders credited to the same salesperson who services Hoffman.
+SELECT * FROM Orders WHERE Snum = (SELECT Snum FROM Customers WHERE Cname = 'Hoffman');
+
+-- 46. All orders that are greater than the average for Oct 4.
+SELECT * FROM Orders WHERE AMT > (SELECT AVG(AMT) FROM Orders WHERE Odate = '1994-10-04');
+
+-- 47. Find average commission of salespeople in London.
+SELECT AVG(Comm) FROM SalesPeople WHERE City = 'London';
+
+-- 48. Find all orders attributed to salespeople servicing customers in London.
+SELECT * FROM Orders WHERE Snum IN (SELECT Snum FROM Customers WHERE City = 'London');
+
+-- 49. Extract commissions of all salespeople servicing customers in London.
+SELECT S.Snum, S.Sname, S.Comm FROM SalesPeople S 
+WHERE S.Snum IN (SELECT DISTINCT Snum FROM Customers WHERE City = 'London');
+
+-- 50. Find all customers whose Cnum is 1000 above the Snum of Serres.
+SELECT * FROM Customers WHERE Cnum = (SELECT Snum FROM SalesPeople WHERE Sname = 'Serres') + 1000;
+
+-- 51. Count the customers with a rating above San Jose’s average.
+SELECT COUNT(*) FROM Customers WHERE Rating > (SELECT AVG(Rating) FROM Customers WHERE City = 'San Jose');
+
+-- 52. Obtain all orders for the customer named Cisnerous.
+SELECT * FROM Orders WHERE Cnum = (SELECT Cnum FROM Customers WHERE Cname = 'Cisnerous');
+
+-- 53. Produce the names and ratings of all customers who have above-average orders.
+SELECT C.Cname, C.Rating FROM Customers C 
+WHERE C.Cnum IN (SELECT Cnum FROM Orders GROUP BY Cnum HAVING AVG(AMT) > (SELECT AVG(AMT) FROM Orders));
+
+-- 54. Find total amount in orders for each salesperson where this total is greater than the amount of the largest order in the table.
+SELECT Snum, SUM(AMT) AS TotalSales FROM Orders GROUP BY Snum 
+HAVING SUM(AMT) > (SELECT MAX(AMT) FROM Orders);
+
+-- 55. Find all customers with orders on 3rd Oct.
+SELECT DISTINCT C.* FROM Customers C 
+JOIN Orders O ON C.Cnum = O.Cnum WHERE O.Odate = '1994-10-03';
+
+-- 56. Find names and numbers of all salespeople who have more than one customer.
+SELECT S.Snum, S.Sname FROM SalesPeople S
+WHERE S.Snum IN (SELECT Snum FROM Customers GROUP BY Snum HAVING COUNT(*) > 1);
+
+-- 57. Check if the correct salesperson was credited with each sale.
+SELECT O.*, C.Snum AS CorrectSnum FROM Orders O 
+JOIN Customers C ON O.Cnum = C.Cnum WHERE O.Snum <> C.Snum;
+
+-- 58. Find all orders with above-average amounts for their customers.
+SELECT * FROM Orders O 
+WHERE O.AMT > (SELECT AVG(AMT) FROM Orders WHERE Cnum = O.Cnum);
+
+-- 59. Find the sums of the amounts from the order table grouped by date, 
+-- eliminating all those dates where the sum was not at least 2000 above the maximum amount.
+SELECT Odate, SUM(AMT) AS TotalAmt FROM Orders GROUP BY Odate 
+HAVING SUM(AMT) >= (SELECT MAX(AMT) FROM Orders) + 2000;
+
+-- 60. Find names and numbers of all customers with ratings equal to the maximum for their city.
+SELECT Cname, Cnum, City FROM Customers C 
+WHERE Rating = (SELECT MAX(Rating) FROM Customers WHERE City = C.City);
+
+-- 61. Find all salespeople who have customers in their cities who they don’t service. (Using Join)
+SELECT DISTINCT S.Snum, S.Sname, S.City 
+FROM SalesPeople S
+JOIN Customers C ON S.City = C.City 
+WHERE S.Snum <> C.Snum;
+
+-- 61. Find all salespeople who have customers in their cities who they don’t service. (Using Correlated Subquery)
+SELECT Snum, Sname, City FROM SalesPeople S
+WHERE EXISTS (
+    SELECT 1 FROM Customers C 
+    WHERE S.City = C.City AND S.Snum <> C.Snum
+);
+
+-- 62. Extract Cnum, Cname, and City from the Customers table 
+-- if and only if one or more of the customers in the table are located in San Jose.
+SELECT Cnum, Cname, City FROM Customers
+WHERE EXISTS (SELECT 1 FROM Customers WHERE City = 'San Jose');
+
+-- 63. Find salesperson numbers who have multiple customers.
+SELECT Snum FROM Customers GROUP BY Snum HAVING COUNT(*) > 1;
+
+-- 64. Find salesperson number, name, and city who have multiple customers.
+SELECT S.Snum, S.Sname, S.City FROM SalesPeople S
+WHERE S.Snum IN (SELECT Snum FROM Customers GROUP BY Snum HAVING COUNT(*) > 1);
+
+-- 65. Find salespeople who serve only one customer.
+SELECT S.Snum, S.Sname FROM SalesPeople S
+WHERE S.Snum IN (SELECT Snum FROM Customers GROUP BY Snum HAVING COUNT(*) = 1);
+
+-- 66. Extract rows of all salespeople with more than one current order.
+SELECT S.Snum, S.Sname, COUNT(O.Onum) AS OrderCount 
+FROM SalesPeople S 
+JOIN Orders O ON S.Snum = O.Snum 
+GROUP BY S.Snum, S.Sname HAVING COUNT(O.Onum) > 1;
+
+-- 67. Find all salespeople who have customers with a rating of 300. (Using EXISTS)
+SELECT DISTINCT S.Snum, S.Sname FROM SalesPeople S
+WHERE EXISTS (SELECT 1 FROM Customers C WHERE C.Snum = S.Snum AND C.Rating = 300);
+
+-- 68. Find all salespeople who have customers with a rating of 300. (Using JOIN)
+SELECT DISTINCT S.Snum, S.Sname FROM SalesPeople S
+JOIN Customers C ON S.Snum = C.Snum WHERE C.Rating = 300;
+
+-- 69. Select all salespeople with customers located in their cities who are not assigned to them. (Using EXISTS)
+SELECT DISTINCT S.Snum, S.Sname, S.City 
+FROM SalesPeople S
+WHERE EXISTS (
+    SELECT 1 FROM Customers C WHERE S.City = C.City AND S.Snum <> C.Snum
+);
+
+-- 70. Extract from Customers table every customer assigned to a salesperson 
+-- who currently has at least one other customer (besides the customer being selected) with orders in Orders table.
+SELECT * FROM Customers C
+WHERE EXISTS (
+    SELECT 1 FROM Orders O 
+    WHERE O.Cnum <> C.Cnum AND O.Snum = C.Snum
+);
+
+-- 71. Find salespeople with customers located in their cities. (Using ANY and IN)
+SELECT * FROM SalesPeople S
+WHERE S.City = ANY (SELECT City FROM Customers);
+
+SELECT * FROM SalesPeople S
+WHERE S.City IN (SELECT City FROM Customers);
+
+-- 72. Find all salespeople for whom there are customers that follow them in alphabetical order. (Using ANY and EXISTS)
+SELECT * FROM SalesPeople S
+WHERE S.Sname < ANY (SELECT Cname FROM Customers);
+
+SELECT * FROM SalesPeople S
+WHERE EXISTS (SELECT 1 FROM Customers C WHERE S.Sname < C.Cname);
+
+-- 73. Select customers who have a greater rating than any customer in Rome.
+SELECT * FROM Customers
+WHERE Rating > ANY (SELECT Rating FROM Customers WHERE City = 'Rome');
+
+-- 74. Select all orders that had amounts greater than at least one of the orders from Oct 6th.
+SELECT * FROM Orders 
+WHERE AMT > ANY (SELECT AMT FROM Orders WHERE Odate = '1994-10-06');
+
+-- 75. Find all orders with amounts smaller than any amount for a customer in San Jose. (Using ANY)
+SELECT * FROM Orders
+WHERE AMT < ANY (SELECT AMT FROM Orders WHERE Cnum IN (SELECT Cnum FROM Customers WHERE City = 'San Jose'));
+
+-- 75. Find all orders with amounts smaller than any amount for a customer in San Jose. (Without ANY)
+SELECT * FROM Orders
+WHERE AMT < (SELECT MIN(AMT) FROM Orders WHERE Cnum IN (SELECT Cnum FROM Customers WHERE City = 'San Jose'));
+
+-- 76. Select those customers whose ratings are higher than every customer in Paris. (Using ALL)
+SELECT * FROM Customers
+WHERE Rating > ALL (SELECT Rating FROM Customers WHERE City = 'Paris');
+
+-- 76. Select those customers whose ratings are higher than every customer in Paris. (Using NOT EXISTS)
+SELECT * FROM Customers C
+WHERE NOT EXISTS (
+    SELECT 1 FROM Customers C2 WHERE C2.City = 'Paris' AND C.Rating <= C2.Rating
+);
+
+-- 77. Select all customers whose ratings are equal to or greater than ANY of Seeres.
+SELECT * FROM Customers
+WHERE Rating >= ANY (SELECT Rating FROM Customers WHERE Cname = 'Serres');
+
+-- 78. Find all salespeople who have no customers located in their city. (Using ANY and ALL)
+SELECT * FROM SalesPeople
+WHERE City <> ANY (SELECT City FROM Customers);
+
+SELECT * FROM SalesPeople
+WHERE NOT EXISTS (SELECT 1 FROM Customers WHERE Customers.City = SalesPeople.City);
+
+-- 79. Find all orders for amounts greater than any for the customers in London.
+SELECT * FROM Orders
+WHERE AMT > ANY (SELECT AMT FROM Orders WHERE Cnum IN (SELECT Cnum FROM Customers WHERE City = 'London'));
+
+-- 80. Find all salespeople and customers located in London.
+SELECT S.Snum, S.Sname, 'Salesperson' AS Type FROM SalesPeople S WHERE S.City = 'London'
+UNION
+SELECT C.Cnum, C.Cname, 'Customer' AS Type FROM Customers C WHERE C.City = 'London';
+
+-- 81. For every salesperson, dates on which highest and lowest orders were brought.
+SELECT O.Snum, 
+       MAX(O.Odate) AS Date_Highest_Order, 
+       MIN(O.Odate) AS Date_Lowest_Order
+FROM Orders O
+GROUP BY O.Snum;
+
+-- 82. List all of the salespeople and indicate those who don’t have customers in their cities as well as those who do have.
+SELECT S.Snum, S.Sname, S.City,
+       CASE 
+           WHEN EXISTS (SELECT 1 FROM Customers C WHERE C.City = S.City) 
+           THEN 'Has Customers in City'
+           ELSE 'No Customers in City'
+       END AS Customer_Status
+FROM SalesPeople S;
+
+-- 83. Append strings to the selected fields, indicating whether or not a given salesperson was matched to a customer in his city.
+SELECT S.Snum, S.Sname, S.City, 
+       CONCAT(S.Sname, ' - ', 
+              CASE 
+                  WHEN EXISTS (SELECT 1 FROM Customers C WHERE C.City = S.City) 
+                  THEN 'Matched to a Customer' 
+                  ELSE 'Not Matched to a Customer' 
+              END) AS Match_Status
+FROM SalesPeople S;
+
+-- 84. Create a union of two queries that shows the names, cities, and ratings of all customers. 
+-- Those with a rating of 200 or greater will also have the words ‘High Rating’, while the others will have the words ‘Low Rating’.
+SELECT Cname, City, Rating, 'High Rating' AS Rating_Category
+FROM Customers
+WHERE Rating >= 200
+UNION
+SELECT Cname, City, Rating, 'Low Rating' AS Rating_Category
+FROM Customers
+WHERE Rating < 200;
+
+-- 85. Write a command that produces the name and number of each salesperson and each customer with more than one current order. 
+-- Put the result in alphabetical order.
+SELECT S.Snum AS ID, S.Sname AS Name, 'Salesperson' AS Type 
+FROM SalesPeople S
+UNION
+SELECT C.Cnum AS ID, C.Cname AS Name, 'Customer' AS Type 
+FROM Customers C
+WHERE C.Cnum IN (SELECT Cnum FROM Orders GROUP BY Cnum HAVING COUNT(*) > 1)
+ORDER BY Name;
+
+-- 86. Form a union of three queries. 
+-- The first selects the snums of all salespeople in San Jose, 
+-- the second selects the cnums of all customers in San Jose, 
+-- and the third selects the onums of all orders on Oct. 3. 
+-- Retain duplicates between the last two queries but eliminate redundancies between either of them and the first.
+SELECT Snum AS ID, 'Salesperson' AS Type FROM SalesPeople WHERE City = 'San Jose'
+UNION
+SELECT Cnum AS ID, 'Customer' AS Type FROM Customers WHERE City = 'San Jose'
+UNION ALL
+SELECT Onum AS ID, 'Order' AS Type FROM Orders WHERE Odate = '1994-10-03';
+
+-- 87. Produce all the salespeople in London who had at least one customer there.
+SELECT DISTINCT S.Snum, S.Sname, S.City 
+FROM SalesPeople S
+JOIN Customers C ON S.Snum = C.Snum 
+WHERE S.City = 'London';
+
+-- 88. Produce all the salespeople in London who did not have customers there.
+SELECT * FROM SalesPeople S
+WHERE S.City = 'London' AND S.Snum NOT IN (SELECT Snum FROM Customers WHERE City = 'London');
+
+-- 89. We want to see salespeople matched to their customers without excluding those salespeople who were not currently assigned to any customers. (Use OUTER JOIN and UNION)
+SELECT S.Snum, S.Sname, S.City, C.Cnum, C.Cname 
+FROM SalesPeople S
+LEFT JOIN Customers C ON S.Snum = C.Snum
+UNION
+SELECT S.Snum, S.Sname, S.City, NULL, NULL 
+FROM SalesPeople S
+WHERE S.Snum NOT IN (SELECT Snum FROM Customers);
